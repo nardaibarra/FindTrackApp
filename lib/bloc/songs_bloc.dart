@@ -105,48 +105,17 @@ class SongsBloc extends Bloc<SongsEvent, SongsState> {
 
   Map<String, String> sendinfo(info) {
     Map<String, String> finalInfo = {};
-    try {
-      finalInfo['title'] = info['result']['title'];
-    } catch (e) {
-      finalInfo['title'] = 'No Title';
-    }
-    try {
-      finalInfo['artist'] = info['result']['artist'];
-    } catch (e) {
-      finalInfo['artist'] = 'No Artist';
-    }
-    try {
-      finalInfo['album'] = info['result']['album'];
-    } catch (e) {
-      finalInfo['album'] = 'No Album';
-    }
-    try {
-      finalInfo['release_date'] = info['result']['release_date'];
-    } catch (e) {
-      finalInfo['release_date'] = 'No Realease Date';
-    }
-    try {
-      finalInfo['apple_music'] = info['result']['apple_music']['url'];
-    } catch (e) {
-      finalInfo['apple_music'] = '#';
-    }
-    try {
-      finalInfo['spotify'] =
-          info['result']['spotify']['external_urls']['spotify'];
-    } catch (e) {
-      finalInfo['spotify'] = '#';
-    }
-    try {
-      finalInfo['image'] =
-          info['result']['spotify']['album']['images'][0]['url'];
-    } catch (e) {
-      finalInfo['image'] = '#';
-    }
-    try {
-      finalInfo['where_to_listen'] = info['result']['song_link'];
-    } catch (e) {
-      finalInfo['where_to_listen'] = '#';
-    }
+    finalInfo['title'] = info['result']?['title'] ?? 'No Title';
+    finalInfo['artist'] = info['result']?['artist'] ?? 'No Title';
+    finalInfo['album'] = info['result']?['album'] ?? 'No Album';
+    finalInfo['release_date'] =
+        info['result']?['release_date'] ?? 'No Realease Date';
+    finalInfo['apple_music'] = info['result']?['apple_music']?['url'] ?? '#';
+    finalInfo['spotify'] =
+        info['result']?['spotify']?['external_urls']?['spotify'] ?? '#';
+    finalInfo['image'] =
+        info['result']?['spotify']?['album']?['images']?[0]?['url'] ?? '#';
+    finalInfo['where_to_listen'] = info['result']?['song_link'] ?? '#';
     return finalInfo;
   }
 
