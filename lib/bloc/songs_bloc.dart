@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:find_track_app/repositories/audD_api.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:bloc/bloc.dart';
@@ -13,7 +15,7 @@ part 'songs_event.dart';
 part 'songs_state.dart';
 
 class SongsBloc extends Bloc<SongsEvent, SongsState> {
-  List<Map<String, String>> favoriteSongs = [];
+  List<dynamic> favoriteSongs = [];
   SongsBloc() : super(SongsInitial()) {
     on<IdentifySongEvent>(_identifySong);
     on<AddToFavoritesEvent>(_addToFavorites);
@@ -113,21 +115,45 @@ class SongsBloc extends Bloc<SongsEvent, SongsState> {
     finalInfo['apple_music'] = info['result']?['apple_music']?['url'] ?? '#';
     finalInfo['spotify'] =
         info['result']?['spotify']?['external_urls']?['spotify'] ?? '#';
-    finalInfo['image'] =
-        info['result']?['spotify']?['album']?['images']?[0]?['url'] ?? '#';
+    finalInfo['image'] = info['result']?['spotify']?['album']?['images']?[0]
+            ?['url'] ??
+        'https://images.unsplash.com/photo-1617994452722-4145e196248b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80';
     finalInfo['where_to_listen'] = info['result']?['song_link'] ?? '#';
     return finalInfo;
   }
 
   FutureOr<void> _addToFavorites(
-      AddToFavoritesEvent event, Emitter<SongsState> emit) {
+      AddToFavoritesEvent event, Emitter<SongsState> emit) async {
+    await FirebaseFirestore.instance.collection('songs').add({
+      'title': event.songInfo['title'],
+      'artist': event.songInfo['artist'],
+      'album': event.songInfo['album'],
+      'release_date': event.songInfo['release_date'],
+      'apple_music': event.songInfo['apple_music'],
+      'spotify': event.songInfo['spotify'],
+      'image': event.songInfo['image'],
+      'where_to_listen': event.songInfo['where_to_listen'],
+      'id': FirebaseAuth.instance.currentUser?.uid
+    });
+
     this.favoriteSongs.add(event.songInfo);
     emit(AddedToFavoritesState());
     emit(IdleFavoritesState());
   }
 
   FutureOr<void> _removeFromFavorites(
-      RemoveFromFavoritesEvent event, Emitter<SongsState> emit) {
+      RemoveFromFavoritesEvent event, Emitter<SongsState> emit) async {
+    var removedSong = await FirebaseFirestore.instance
+        .collection('songs')
+        .where('id', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+        .where('title', isEqualTo: event.songTitle)
+        .get()
+        .then((querySnapshot) => querySnapshot);
+
+    for (var doc in removedSong.docs) {
+      await doc.reference.delete();
+    }
+
     emit(RemovedFromFavoritesState());
     this
         .favoriteSongs
@@ -137,9 +163,23 @@ class SongsBloc extends Bloc<SongsEvent, SongsState> {
     emit(SongsInitial());
   }
 
-  FutureOr<void> _goToFavorites(
-      ShowFavoritesEvent event, Emitter<SongsState> emit) {
+  Future<FutureOr<void>> _goToFavorites(
+      ShowFavoritesEvent event, Emitter<SongsState> emit) async {
+    favoriteSongs = await getFavorites();
     emit(ShowingFavoritesState(this.favoriteSongs));
     emit(IdleFavoritesState());
+  }
+
+  FutureOr<List<dynamic>> getFavorites() async {
+    var favoriteSongs = await FirebaseFirestore.instance
+        .collection("songs")
+        .where("id", isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+        .get();
+
+    var mySongs = favoriteSongs.docs
+        .map((doc) => doc.data().cast<String, String>())
+        .toList();
+    print(mySongs);
+    return mySongs;
   }
 }

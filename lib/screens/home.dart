@@ -1,3 +1,4 @@
+import 'package:find_track_app/bloc/bloc/auth_bloc.dart';
 import 'package:find_track_app/screens/favorites.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -98,7 +99,10 @@ class Home extends StatelessWidget {
                       child: IconButton(
                           color: Color.fromARGB(183, 4, 4, 4),
                           icon: Icon(Icons.power_settings_new_rounded),
-                          onPressed: () {}),
+                          onPressed: () {
+                            BlocProvider.of<AuthBloc>(context)
+                                .add(LogoutEvent());
+                          }),
                     )
                   ],
                 ),

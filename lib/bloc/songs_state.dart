@@ -35,7 +35,7 @@ class AddedToFavoritesState extends SongsState {}
 class RemovedFromFavoritesState extends SongsState {}
 
 class ShowingFavoritesState extends SongsState {
-  final List<Map<String, String>> favoriteList;
+  final List<dynamic> favoriteList;
   ShowingFavoritesState(this.favoriteList);
   @override
   List<Object> get props => [favoriteList];

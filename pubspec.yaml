@@ -39,8 +39,13 @@ dependencies:
   http: ^0.13.5
   url_launcher:
   flutter_launcher_icons: ^0.10.0
-
-
+  metaballs: ^1.4.2
+  # Firebase plugins:
+  firebase_core:
+  firebase_auth:
+  flutterfire_ui:
+  cloud_firestore:
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -8,7 +8,7 @@ import '../widgets/favorite_card.dart';
 class Favorites extends StatelessWidget {
   Favorites({super.key});
 
-  List<Map<String, String>> _favorites = [];
+  List<dynamic> _favorites = [];
 
   @override
   Widget build(BuildContext context) {
